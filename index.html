@@ -297,36 +297,38 @@
                 const el = document.createElement('div');
                 el.className = isGeneral ? 'general-card' : 'card';
                 
-                // --- ИСПРАВЛЕННЫЙ БЛОК КЛИКА ---
+                el.style.cursor = 'pointer';
+
                 el.addEventListener('click', function(e) {
-                    // 1. Проверяем наличие ссылки и превращаем её в строку
                     const rawLink = chat.link ? String(chat.link).trim() : "";
-                    
-                    if (!rawLink || rawLink === "") {
-                        alert("У этой команды не указана ссылка на чат!");
-                        return;
-                    }
-
-                    // 2. Пытаемся открыть через Bridge
+                    if (!rawLink) return alert("Нет ссылки!");
                     vkBridge.send("VKWebAppOpenExternalLink", {"url": rawLink})
-                    .catch(err => {
-                        // 3. Резервный вариант, если Bridge не сработал (для ПК или ошибок)
-                        window.open(rawLink, '_blank');
-                    });
+                    .catch(() => window.open(rawLink, '_blank'));
                 });
-                // ------------------------------
 
+                // Исправленный HTML с жестким ограничением размера для флудилки
                 el.innerHTML = `
-                    <div class="${isGeneral ? '' : 'image-container'}">
-                        <img src="${chat.image || 'https://vk.com/images/camera_200.png'}" loading="lazy">
+                    <div class="${isGeneral ? '' : 'image-container'}" style="${isGeneral ? 'width: 52px; height: 52px; flex-shrink: 0;' : ''}">
+                        <img src="${chat.image || 'https://vk.com/images/camera_200.png'}" 
+                             style="${isGeneral ? 'width: 52px; height: 52px; border-radius: 12px; object-fit: cover;' : 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;'}" 
+                             loading="lazy">
+                        
+                        ${!isGeneral ? `
                         <div class="members-tag">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                            ${chat.members !== undefined ? chat.members : 0}
-                        </div>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                            ${chat.members || 0}
+                        </div>` : ''}
                     </div>
-                    <div class="${isGeneral ? '' : 'card-info'}">
-                        ${isGeneral ? `<div style="margin-left:14px; flex-grow:1;"><div style="font-weight:600; font-size:15px;">${chat.title}</div><div style="font-size:13px; color:var(--vkui--color_text_secondary);">Войти в чат</div></div>` : chat.title}
+                    
+                    <div class="${isGeneral ? '' : 'card-info'}" style="${isGeneral ? 'margin-left: 14px; flex-grow: 1; text-align: left;' : ''}">
+                        ${isGeneral ? `
+                            <div style="font-weight: 600; font-size: 15px;">${chat.title}</div>
+                            <div style="font-size: 13px; color: var(--vkui--color_text_secondary); margin-top: 2px;">
+                                👤 ${chat.members || 0} участников • Войти
+                            </div>
+                        ` : chat.title}
                     </div>
+
                     <div class="delete-btn" onclick="deleteChat(event, '${chat.link}')" style="display: ${isAdmin ? 'flex' : 'none'}">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </div>
