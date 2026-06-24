@@ -72,12 +72,28 @@
         .card-info { padding: 12px 8px; text-align: center; flex-grow: 1; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; line-height: 1.3; }
 
         /* Админка: Кнопка добавления */
-        .admin-fab {
-            position: fixed; bottom: 24px; right: 24px;
-            width: 56px; height: 56px; border-radius: 28px;
-            background: var(--vkui--color_accent_themed);
-            color: white; display: none; align-items: center; justify-content: center;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.3); z-index: 1000; cursor: pointer;
+        .admin-fab { 
+            position: fixed; 
+            bottom: 24px; 
+            right: 24px; 
+            width: 60px; 
+            height: 60px; 
+            border-radius: 30px; 
+            background: #0077FF; /* Принудительный ярко-синий цвет ВК */
+            color: white; 
+            display: none; 
+            align-items: center; 
+            justify-content: center; 
+            /* Сильная тень для контраста на белом фоне */
+            box-shadow: 0 4px 20px rgba(0, 119, 255, 0.4), 0 8px 30px rgba(0, 0, 0, 0.2); 
+            z-index: 1000; 
+            cursor: pointer;
+            border: 2px solid white; /* Тонкая белая рамка, чтобы кнопка не сливалась */
+            transition: transform 0.1s ease;
+        }
+
+        .admin-fab:active {
+            transform: scale(0.9);
         }
 
         /* Админка: Кнопка удаления */
