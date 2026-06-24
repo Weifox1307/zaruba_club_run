@@ -174,15 +174,15 @@
         <span style="color: var(--vkui--color_text_secondary); font-size: 14px;">Синхронизация...</span>
     </div>
 
+   <!-- Блок Место старта -->
     <div id="start-location-section" style="padding: 0 16px 12px;">
         <div class="section-title">Информация</div>
-        <div class="general-card" onclick="vkBridge.send('VKWebAppOpenExternalLink', {url: 'https://vk.com/doc13247706_698646288?hash=EZFvc9dSyVDCNZ0DBnmG1ssZmHN29VqnQaLXYRdqxXk&dl=UBJ00BldT8gyN1IQf6Qa19DdNmrYpVq7XzSLpVlMzPH&from_module=vkmsg_desktop'})">
+        <div class="general-card" id="pdf-button" style="cursor: pointer;">
             <div style="width: 52px; height: 52px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(0, 119, 255, 0.1); border-radius: 12px;">
-                <!-- Иконка карты/локации -->
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0077FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
             </div>
             <div style="margin-left: 14px; flex-grow: 1;">
-                <div style="font-weight: 600; font-size: 15px;">Место старта</div>
+                <div style="font-weight: 600; font-size: 15px;">Положение старта</div>
                 <div style="font-size: 13px; color: var(--vkui--color_text_secondary); margin-top: 2px;">Положение Межклубной Зарубы (PDF)</div>
             </div>
             <div style="color: var(--vkui--color_accent_themed); font-weight: 600; font-size: 14px;">Открыть</div>
@@ -363,6 +363,20 @@
         });
 
         loadChats();
+
+        // Обработчик для PDF-файла
+    document.getElementById('pdf-button').addEventListener('click', function() {
+        const PDF_LINK = "https://vk.com/doc13247706_698646288?hash=EZFvc9dSyVDCNZ0DBnmG1ssZmHN29VqnQaLXYRdqxXk&dl=UBJ00BldT8gyN1IQf6Qa19DdNmrYpVq7XzSLpVlMzPH&from_module=vkmsg_desktop"; // Вставь сюда ссылку (начинается с https://)
+        
+        if (!PDF_LINK || PDF_LINK.includes("ССЫЛКА")) {
+            return alert("Ссылка на документ еще не добавлена");
+        }
+    
+        vkBridge.send("VKWebAppOpenExternalLink", {"url": PDF_LINK.trim()})
+        .catch(() => {
+            window.open(PDF_LINK.trim(), '_blank');
+        });
+    });
     </script>
 </body>
 </html>
