@@ -3,211 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no, viewport-fit=cover">
-    <title>Командные Чаты</title>
+    <title>Чаты Забега</title>
     <link rel="stylesheet" href="https://unpkg.com/@vkontakte/vkui@5.0.0/dist/vkui.css">
     <style>
-        :root {
-            --card-radius: 16px;
+        :root { --card-radius: 16px; }
+        body { 
+            background-color: var(--vkui--color_background_content); 
+            font-family: -apple-system, system-ui, sans-serif; 
+            margin: 0; color: var(--vkui--color_text_primary);
+            -webkit-font-smoothing: antialiased;
         }
+
+        /* Шапка */
+        .header { padding: 24px 16px 16px; }
+        .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .header h1 { font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.5px; }
+        .badge-count { background: var(--vkui--color_accent_themed); color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
         
-        body {
-            background-color: var(--vkui--color_background_content);
-            font-family: -apple-system, BlinkMacSystemFont, 'Roboto', 'Open Sans', sans-serif;
-            margin: 0; padding: 0;
+        /* Поиск */
+        .search-container { padding: 0 16px 16px; }
+        .search-input {
+            width: 100%; padding: 10px 14px; border-radius: 10px;
+            border: 1px solid var(--vkui--color_separator_primary_alpha);
+            background: var(--vkui--color_background_modal);
             color: var(--vkui--color_text_primary);
+            font-size: 15px; outline: none; box-sizing: border-box;
         }
 
-        .header {
-            padding: 24px 16px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+        .section-title { padding: 0 16px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--vkui--color_text_secondary); margin-bottom: 12px; font-weight: 600; }
+        
+        /* Флудилка */
+        .general-chat-container { padding: 0 16px 24px; }
+        .general-card { 
+            background: var(--vkui--color_background_modal); 
+            border-radius: var(--card-radius); padding: 16px; 
+            display: flex; align-items: center; gap: 14px; 
+            border: 1px solid var(--vkui--color_separator_primary_alpha); 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: pointer;
+            transition: all 0.2s ease;
         }
 
-        .header h1 {
-            font-size: 24px; font-weight: 700; margin: 0;
+        /* Команды */
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 0 16px 20px; }
+        .card { 
+            background: var(--vkui--color_background_modal); 
+            border-radius: var(--card-radius); overflow: hidden; position: relative; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06); 
+            border: 1px solid var(--vkui--color_separator_primary_alpha); 
+            cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; 
+            display: flex; flex-direction: column;
+            animation: fadeIn 0.5s ease forwards;
         }
 
-        .badge-count {
-            background: var(--vkui--color_accent_themed);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card:active, .general-card:active { transform: scale(0.96); box-shadow: none; }
+        .image-container { width: 100%; padding-top: 100%; position: relative; background: #f0f2f5; }
+        .image-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+        
+        .members-tag { 
+            position: absolute; top: 8px; right: 8px; 
+            background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            color: white; padding: 3px 8px; border-radius: 8px; font-size: 11px; font-weight: 700; 
         }
 
-        .section-title {
-            padding: 0 16px;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--vkui--color_text_secondary);
-            margin-bottom: 8px;
-        }
+        .card-info { padding: 12px 8px; text-align: center; flex-grow: 1; display: flex; align-items: center; justify-content: center; }
+        .card-title { font-size: 13px; font-weight: 600; line-height: 1.3; }
 
-        /* Стиль общей флудилки */
-        .general-chat-container {
-            padding: 0 16px 20px;
-        }
-        .general-card {
-            background: var(--vkui--color_background_modal);
-            border-radius: var(--card-radius);
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border: 1px solid var(--vkui--color_separator_primary_alpha);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            padding: 0 16px 16px;
-        }
-
-        .card {
-            background: var(--vkui--color_background_modal);
-            border-radius: var(--card-radius);
-            overflow: hidden;
-            transition: transform 0.15s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            border: 1px solid var(--vkui--color_separator_primary_alpha);
-            position: relative;
-        }
-
-        .card:active, .general-card:active {
-            transform: scale(0.97);
-        }
-
-        .image-container {
-            width: 100%;
-            padding-top: 100%;
-            position: relative;
-        }
-
-        .image-container img {
-            position: absolute; top: 0; left: 0;
-            width: 100%; height: 100%; object-fit: cover;
-        }
-
-        /* Счетчик участников на плитке */
-        .members-tag {
-            position: absolute;
-            top: 8px; right: 8px;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: 500;
-        }
-
-        .card-info {
-            padding: 10px;
-            text-align: center;
-        }
-
-        .card-title {
-            font-size: 13px; font-weight: 600; line-height: 1.3;
-        }
-
-        #loader { display: flex; justify-content: center; align-items: center; height: 50vh; }
-        .spinner {
-            width: 30px; height: 30px;
-            border: 3px solid var(--vkui--color_separator_primary);
-            border-top-color: var(--vkui--color_accent_themed);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
+        #loader { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 60vh; gap: 12px; }
+        .spinner { width: 32px; height: 32px; border: 3px solid var(--vkui--color_separator_primary); border-top-color: var(--vkui--color_accent_themed); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div>
-            <h1 id="user-name">Чаты забега</h1>
-            <p style="color: var(--vkui--color_text_secondary); font-size: 14px; margin-top: 4px;">Выбери свою команду</p>
-        </div>
-        <div id="team-counter-wrap" style="display:none">
-            <span class="badge-count" id="team-count">0 команд</span>
+        <div class="header-top">
+            <div>
+                <h1 id="greeting">Чаты забега</h1>
+                <p id="subtitle" style="color: var(--vkui--color_text_secondary); font-size: 14px; margin-top: 4px;">Загрузка участников...</p>
+            </div>
+            <span class="badge-count" id="team-count" style="display:none">0</span>
         </div>
     </div>
 
-    <div id="loader"><div class="spinner"></div></div>
+    <div class="search-container" id="search-box" style="display:none">
+        <input type="text" class="search-input" id="search-input" placeholder="Поиск команды...">
+    </div>
 
-    <!-- Общий чат -->
+    <div id="loader">
+        <div class="spinner"></div>
+        <span style="color: var(--vkui--color_text_secondary); font-size: 14px;">Синхронизация с ВК...</span>
+    </div>
+
     <div id="general-section" style="display:none">
-        <div class="section-title">Общий чат</div>
+        <div class="section-title">Основное</div>
         <div class="general-chat-container" id="general-container"></div>
     </div>
 
-    <!-- Командные чаты -->
     <div id="teams-section" style="display:none">
-        <div class="section-title">Команды</div>
+        <div class="section-title">Командные чаты</div>
         <div class="grid" id="teams-container"></div>
     </div>
 
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
-
     <script>
         vkBridge.send("VKWebAppInit");
 
-        const API_URL = 'https://script.google.com/macros/s/AKfycby2Gd68SvWdabWknigOcBGFHA-K-jrRRX56UpwSSMCGA-QK5YScPLGD0Gjdkp85A3Bz/exec';
+        // Приветствие пользователя
+        vkBridge.send("VKWebAppGetUserInfo").then(data => {
+            if (data.first_name) {
+                document.getElementById('greeting').innerText = `Привет, ${data.first_name}!`;
+            }
+        });
+
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzsImNDpiJeYtngb66c-ysXckWLM8eC9fPqszInCNutL2-iPXohuvT9oQNFmg1hIMQ/exec';
+        let allChats = [];
 
         async function loadChats() {
             try {
                 const response = await fetch(API_URL);
-                const data = await response.json();
+                allChats = await response.json();
                 
-                const loader = document.getElementById('loader');
-                const teamsContainer = document.getElementById('teams-container');
-                const generalContainer = document.getElementById('general-container');
-                
-                loader.style.display = 'none';
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('subtitle').innerText = 'Выбирай свою команду';
+                document.getElementById('search-box').style.display = 'block';
 
-                // Фильтруем данные
-                const generalChats = data.filter(item => item.type === 'general');
-                const teamChats = data.filter(item => item.type === 'team');
+                renderItems(allChats);
 
-                // Показываем счетчик команд
-                if(teamChats.length > 0) {
-                    document.getElementById('team-counter-wrap').style.display = 'block';
-                    document.getElementById('team-count').innerText = teamChats.length + ' команд';
-                    document.getElementById('teams-section').style.display = 'block';
-                }
+                // Слушатель поиска
+                document.getElementById('search-input').addEventListener('input', (e) => {
+                    const term = e.target.value.toLowerCase();
+                    const filtered = allChats.filter(chat => chat.title.toLowerCase().includes(term));
+                    renderItems(filtered);
+                });
 
-                // Рендерим Флудилку
-                if(generalChats.length > 0) {
-                    document.getElementById('general-section').style.display = 'block';
-                    generalChats.forEach(chat => {
-                        const el = document.createElement('div');
-                        el.className = 'general-card';
-                        el.innerHTML = `
-                            <img src="${chat.image}" style="width:48px; height:48px; border-radius:12px; object-fit:cover;">
-                            <div style="flex-grow:1">
-                                <div style="font-weight:600; font-size:15px;">${chat.title}</div>
-                                <div style="font-size:13px; color:var(--vkui--color_text_secondary);">${chat.members || 0} участников</div>
-                            </div>
-                            <div style="color:var(--vkui--color_accent_themed); font-weight:500;">Войти</div>
-                        `;
-                        el.onclick = () => openLink(chat.link);
-                        generalContainer.appendChild(el);
-                    });
-                }
+            } catch (e) {
+                document.getElementById('loader').innerHTML = 'Ошибка загрузки данных';
+            }
+        }
 
-                // Рендерим Команды
+        function renderItems(data) {
+            const teamsContainer = document.getElementById('teams-container');
+            const generalContainer = document.getElementById('general-container');
+            
+            teamsContainer.innerHTML = '';
+            generalContainer.innerHTML = '';
+
+            const generalChats = data.filter(item => String(item.type).toLowerCase() === 'general');
+            const teamChats = data.filter(item => String(item.type).toLowerCase() === 'team');
+
+            // Рендер Флудилки
+            if(generalChats.length > 0) {
+                document.getElementById('general-section').style.display = 'block';
+                generalChats.forEach(chat => {
+                    const el = document.createElement('div');
+                    el.className = 'general-card';
+                    el.innerHTML = `
+                        <img src="${chat.image}" style="width:52px; height:52px; border-radius:14px; object-fit:cover;">
+                        <div style="flex-grow:1">
+                            <div style="font-weight:600; font-size:15px;">${chat.title}</div>
+                            <div style="font-size:13px; color:var(--vkui--color_text_secondary);">👤 ${chat.members || 0} участников</div>
+                        </div>
+                        <div style="color:var(--vkui--color_accent_themed); font-weight:600; font-size:14px;">Войти</div>
+                    `;
+                    el.onclick = () => openLink(chat.link);
+                    generalContainer.appendChild(el);
+                });
+            } else {
+                document.getElementById('general-section').style.display = 'none';
+            }
+
+            // Рендер Команд
+            if(teamChats.length > 0) {
+                document.getElementById('teams-section').style.display = 'block';
+                document.getElementById('team-count').style.display = 'block';
+                document.getElementById('team-count').innerText = teamChats.length;
+
                 teamChats.forEach(chat => {
                     const card = document.createElement('div');
                     card.className = 'card';
+                    // Исправлено: теперь показывает 👤 0 если в чате никого нет
                     card.innerHTML = `
                         <div class="image-container">
                             <img src="${chat.image || 'https://vk.com/images/camera_200.png'}" loading="lazy">
-                            ${chat.members ? `<div class="members-tag">👤 ${chat.members}</div>` : ''}
+                            <div class="members-tag">👤 ${chat.members !== undefined ? chat.members : 0}</div>
                         </div>
                         <div class="card-info">
                             <div class="card-title">${chat.title}</div>
@@ -216,18 +196,16 @@
                     card.onclick = () => openLink(chat.link);
                     teamsContainer.appendChild(card);
                 });
-
-            } catch (e) {
-                console.error(e);
-                document.getElementById('loader').innerHTML = 'Ошибка. Проверьте колонки в таблице.';
+            } else {
+                document.getElementById('teams-section').style.display = 'none';
+                document.getElementById('team-count').style.display = 'none';
             }
         }
 
         function openLink(link) {
             if(!link) return;
-            const url = link.trim();
-            vkBridge.send("VKWebAppOpenExternalLink", {"url": url})
-            .catch(() => window.open(url, '_blank'));
+            vkBridge.send("VKWebAppOpenExternalLink", {"url": link.trim()})
+            .catch(() => window.open(link, '_blank'));
         }
 
         loadChats();
