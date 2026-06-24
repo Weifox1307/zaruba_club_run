@@ -13,172 +13,221 @@
         body {
             background-color: var(--vkui--color_background_content);
             font-family: -apple-system, BlinkMacSystemFont, 'Roboto', 'Open Sans', sans-serif;
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             color: var(--vkui--color_text_primary);
         }
 
         .header {
-            padding: 24px 16px 12px;
+            padding: 24px 16px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
         }
 
         .header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            margin: 0;
-            margin-bottom: 4px;
+            font-size: 24px; font-weight: 700; margin: 0;
         }
 
-        .header p {
-            color: var(--vkui--color_text_secondary);
+        .badge-count {
+            background: var(--vkui--color_accent_themed);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
             font-size: 14px;
-            margin: 0;
+            font-weight: 600;
+        }
+
+        .section-title {
+            padding: 0 16px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--vkui--color_text_secondary);
+            margin-bottom: 8px;
+        }
+
+        /* Стиль общей флудилки */
+        .general-chat-container {
+            padding: 0 16px 20px;
+        }
+        .general-card {
+            background: var(--vkui--color_background_modal);
+            border-radius: var(--card-radius);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid var(--vkui--color_separator_primary_alpha);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
         .grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
-            padding: 16px;
+            padding: 0 16px 16px;
         }
 
-        /* Стиль карточки */
         .card {
             background: var(--vkui--color_background_modal);
             border-radius: var(--card-radius);
-            position: relative;
             overflow: hidden;
             transition: transform 0.15s ease;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             border: 1px solid var(--vkui--color_separator_primary_alpha);
-            display: flex;
-            flex-direction: column;
+            position: relative;
         }
 
-        .card:active {
-            transform: scale(0.96);
+        .card:active, .general-card:active {
+            transform: scale(0.97);
         }
 
         .image-container {
             width: 100%;
-            padding-top: 100%; /* Квадрат */
+            padding-top: 100%;
             position: relative;
-            background: var(--vkui--color_placeholder_icon_alpha);
         }
 
         .image-container img {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%; object-fit: cover;
+        }
+
+        /* Счетчик участников на плитке */
+        .members-tag {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            object-fit: cover;
+            top: 8px; right: 8px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
         }
 
         .card-info {
             padding: 10px;
             text-align: center;
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .card-title {
-            font-size: 13px;
-            font-weight: 600;
-            line-height: 1.3;
-            max-height: 2.6em;
-            overflow: hidden;
+            font-size: 13px; font-weight: 600; line-height: 1.3;
         }
 
-        /* Красивый лоадер */
-        #loader {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 50vh;
-        }
-
+        #loader { display: flex; justify-content: center; align-items: center; height: 50vh; }
         .spinner {
-            width: 30px;
-            height: 30px;
+            width: 30px; height: 30px;
             border: 3px solid var(--vkui--color_separator_primary);
             border-top-color: var(--vkui--color_accent_themed);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1 id="user-name">Чаты команд</h1>
-        <p>Выбери свою команду и жми на плитку</p>
+        <div>
+            <h1 id="user-name">Чаты забега</h1>
+            <p style="color: var(--vkui--color_text_secondary); font-size: 14px; margin-top: 4px;">Выбери свою команду</p>
+        </div>
+        <div id="team-counter-wrap" style="display:none">
+            <span class="badge-count" id="team-count">0 команд</span>
+        </div>
     </div>
 
     <div id="loader"><div class="spinner"></div></div>
-    <div class="grid" id="container"></div>
+
+    <!-- Общий чат -->
+    <div id="general-section" style="display:none">
+        <div class="section-title">Общий чат</div>
+        <div class="general-chat-container" id="general-container"></div>
+    </div>
+
+    <!-- Командные чаты -->
+    <div id="teams-section" style="display:none">
+        <div class="section-title">Команды</div>
+        <div class="grid" id="teams-container"></div>
+    </div>
 
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
 
     <script>
         vkBridge.send("VKWebAppInit");
 
-        // Поддержка темной темы ВК
-        vkBridge.subscribe((e) => {
-            if (e.detail.type === 'VKWebAppUpdateConfig') {
-                const scheme = e.detail.data.scheme ? e.detail.data.scheme : 'client_light';
-                document.body.setAttribute('scheme', scheme);
-            }
-        });
-
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzq6I0MJW5hmWRP0QUI4om6kE9vxMNwUEIFp1-t_mBdiNb407KGysSO-wMFr70gdBhn/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycby2Gd68SvWdabWknigOcBGFHA-K-jrRRX56UpwSSMCGA-QK5YScPLGD0Gjdkp85A3Bz/exec';
 
         async function loadChats() {
             try {
                 const response = await fetch(API_URL);
                 const data = await response.json();
                 
-                const container = document.getElementById('container');
                 const loader = document.getElementById('loader');
+                const teamsContainer = document.getElementById('teams-container');
+                const generalContainer = document.getElementById('general-container');
                 
                 loader.style.display = 'none';
-                container.innerHTML = '';
 
-                data.forEach(chat => {
-                    if(!chat.title || !chat.link) return; // Пропуск пустых строк
+                // Фильтруем данные
+                const generalChats = data.filter(item => item.type === 'general');
+                const teamChats = data.filter(item => item.type === 'team');
 
+                // Показываем счетчик команд
+                if(teamChats.length > 0) {
+                    document.getElementById('team-counter-wrap').style.display = 'block';
+                    document.getElementById('team-count').innerText = teamChats.length + ' команд';
+                    document.getElementById('teams-section').style.display = 'block';
+                }
+
+                // Рендерим Флудилку
+                if(generalChats.length > 0) {
+                    document.getElementById('general-section').style.display = 'block';
+                    generalChats.forEach(chat => {
+                        const el = document.createElement('div');
+                        el.className = 'general-card';
+                        el.innerHTML = `
+                            <img src="${chat.image}" style="width:48px; height:48px; border-radius:12px; object-fit:cover;">
+                            <div style="flex-grow:1">
+                                <div style="font-weight:600; font-size:15px;">${chat.title}</div>
+                                <div style="font-size:13px; color:var(--vkui--color_text_secondary);">${chat.members || 0} участников</div>
+                            </div>
+                            <div style="color:var(--vkui--color_accent_themed); font-weight:500;">Войти</div>
+                        `;
+                        el.onclick = () => openLink(chat.link);
+                        generalContainer.appendChild(el);
+                    });
+                }
+
+                // Рендерим Команды
+                teamChats.forEach(chat => {
                     const card = document.createElement('div');
                     card.className = 'card';
                     card.innerHTML = `
                         <div class="image-container">
                             <img src="${chat.image || 'https://vk.com/images/camera_200.png'}" loading="lazy">
+                            ${chat.members ? `<div class="members-tag">👤 ${chat.members}</div>` : ''}
                         </div>
                         <div class="card-info">
                             <div class="card-title">${chat.title}</div>
                         </div>
                     `;
-                    
-                    card.onclick = () => {
-                        const url = chat.link.trim();
-                        
-                        // Основной метод открытия
-                        vkBridge.send("VKWebAppOpenExternalLink", {"url": url})
-                        .catch(err => {
-                            // Если не сработало, пробуем через обычное открытие
-                            window.open(url, '_blank');
-                        });
-                    };
-
-                    container.appendChild(card);
+                    card.onclick = () => openLink(chat.link);
+                    teamsContainer.appendChild(card);
                 });
+
             } catch (e) {
-                document.getElementById('loader').innerHTML = 'Ошибка загрузки. Проверьте таблицу.';
                 console.error(e);
+                document.getElementById('loader').innerHTML = 'Ошибка. Проверьте колонки в таблице.';
             }
+        }
+
+        function openLink(link) {
+            if(!link) return;
+            const url = link.trim();
+            vkBridge.send("VKWebAppOpenExternalLink", {"url": url})
+            .catch(() => window.open(url, '_blank'));
         }
 
         loadChats();
