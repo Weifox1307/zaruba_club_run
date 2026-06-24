@@ -297,14 +297,28 @@
                 const el = document.createElement('div');
                 el.className = isGeneral ? 'general-card' : 'card';
                 
-                // ВЕШАЕМ КЛИК НА ВСЮ КАРТОЧКУ
-                el.onclick = () => {
-                    vkBridge.send("VKWebAppOpenExternalLink", {"url": chat.link.trim()});
-                };
+                // --- ИСПРАВЛЕННЫЙ БЛОК КЛИКА ---
+                el.addEventListener('click', function(e) {
+                    // 1. Проверяем наличие ссылки и превращаем её в строку
+                    const rawLink = chat.link ? String(chat.link).trim() : "";
+                    
+                    if (!rawLink || rawLink === "") {
+                        alert("У этой команды не указана ссылка на чат!");
+                        return;
+                    }
+
+                    // 2. Пытаемся открыть через Bridge
+                    vkBridge.send("VKWebAppOpenExternalLink", {"url": rawLink})
+                    .catch(err => {
+                        // 3. Резервный вариант, если Bridge не сработал (для ПК или ошибок)
+                        window.open(rawLink, '_blank');
+                    });
+                });
+                // ------------------------------
 
                 el.innerHTML = `
                     <div class="${isGeneral ? '' : 'image-container'}">
-                        <img src="${chat.image}" style="${isGeneral ? 'width:52px; height:52px; border-radius:14px; object-fit:cover;' : ''}" loading="lazy">
+                        <img src="${chat.image || 'https://vk.com/images/camera_200.png'}" loading="lazy">
                         <div class="members-tag">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                             ${chat.members !== undefined ? chat.members : 0}
